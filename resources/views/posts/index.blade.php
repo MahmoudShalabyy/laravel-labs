@@ -13,6 +13,7 @@
             <tr>
                 <th>ID</th>
                 <th>Title</th>
+                <th>Short Description</th>
                 <th>Author</th>
                 <th>Created At</th>
                 <th width="220">Actions</th>
@@ -23,8 +24,9 @@
                 <tr>
                     <td class="text-center fw-bold">{{ $post->id }}</td>
                     <td>{{ $post->title }}</td>
+                    <td>{{ $post->short_description }}</td>
                     <td>{{ $post->user->name ?? 'Unknown' }}</td>
-                    <td>{{ $post->created_at->format('d/m/Y') }}</td>
+                    <td>{{ $post->created_at_formatted }}</td>
                     <td class="text-center">
                         <a href="{{ route('posts.show',$post->id) }}" class="btn btn-info btn-sm">View</a>
                         <a href="{{ route('posts.edit',$post->id) }}" class="btn btn-primary btn-sm">Edit</a>
@@ -40,7 +42,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center text-muted">No Posts Found</td>
+                    <td colspan="6" class="text-center text-muted">No Posts Found</td>
                 </tr>
             @endforelse
         </tbody>

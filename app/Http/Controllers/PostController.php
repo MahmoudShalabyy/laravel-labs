@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+
 
 class PostController extends Controller
 {
@@ -32,14 +35,9 @@ class PostController extends Controller
         return view('posts.create', compact('users'));
     }
 
-  public function store(Request $request)
+ 
+public function store(StorePostRequest $request)
 {
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'required|string',
-        'user_id' => 'required|exists:users,id'
-    ]);
-
     Post::create([
         'title' => $request->title,
         'description' => $request->description,
@@ -56,23 +54,18 @@ class PostController extends Controller
         return view('posts.edit', compact('post', 'users'));
     }
 
-    public function update($postId)
-    {
-        request()->validate([
-            'title' => ['required', 'min:3'],
-            'description' => ['required', 'min:5'],
-        ]);
+    public function update(UpdatePostRequest $request, $postId)
+{
+    $postFromDB = Post::find($postId);
 
-        $postFromDB = Post::find($postId);
+    $postFromDB->update([
+        'title' => $request->title,
+        'description' => $request->description,
+        'user_id' => $request->user_id, 
+    ]);
 
-        $postFromDB->update([
-            'title' => request()->title,
-            'description' => request()->description,
-            'creator' => request()->post_creator,
-        ]);
-
-        return to_route('posts.show', $postId);
-    }
+    return to_route('posts.show', $postId);
+}
 
     public function destroy($postId)
     {
@@ -82,6 +75,7 @@ class PostController extends Controller
         return to_route('posts.index');
     }
 
+    //comment
     public function addComment(Request $request, Post $post)
     {
         $request->validate([
@@ -94,4 +88,28 @@ class PostController extends Controller
 
         return back();
     }
+
+    // (trashed)
+public function trashed()
+{
+    $posts = Post::onlyTrashed()->get();
+    return view('posts.trashed', compact('posts'));
+}
+
+// (restore)
+public function restore($id)
+{
+    $post = Post::onlyTrashed()->findOrFail($id);
+    $post->restore();
+    return redirect()->route('posts.trashed');
+}
+
+// (force delete)
+public function forceDelete($id)
+{
+    $post = Post::onlyTrashed()->findOrFail($id);
+    $post->forceDelete();
+    return redirect()->route('posts.trashed');
+}
+
 }
